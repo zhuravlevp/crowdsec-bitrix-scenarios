@@ -29,6 +29,39 @@ sudo cscli scenarios list | grep my/bitrix
 
 В логе CrowdSec не должно быть ошибок разбора YAML. После срабатывания решение появляется в `sudo cscli decisions list`.
 
+## AppSec
+
+Правила в `appsec-rules/` проверяют запрос до PHP. Сценарии по access-логу этого не делают: тело POST в лог не попадает, а ответ 200 уже значит, что скрипт отработал.
+
+Сейчас два in-band правила:
+
+- `my/bitrix-esol-kda` режет любой HTTP-запрос к `.php` под `/bitrix/admin/` и `/bitrix/modules/`, если в пути есть `esol` или `kda`. Это cron-скрипты и профили модулей импорта Excel/XML. После такого запрета страница настройки этих модулей в админке тоже не откроется, пока правило включено.
+- `my/bitrix-dropped-php` режет запрос к файлу в корне сайта с именем из 8–32 шестнадцатеричных символов и расширением `.php`. Так сканер проверяет, записался ли шелл.
+
+Установка поверх уже работающего AppSec. Строку `crowdsecurity/appsec-default` в `acquis` не убирайте.
+
+```bash
+sudo mkdir -p /etc/crowdsec/appsec-rules /etc/crowdsec/appsec-configs
+sudo cp appsec-rules/*.yaml /etc/crowdsec/appsec-rules/
+sudo cp appsec-configs/bitrix.yaml /etc/crowdsec/appsec-configs/
+```
+
+В `/etc/crowdsec/acquis.d/appsec.yaml` добавьте конфиг в конец списка:
+
+```yaml
+appsec_configs:
+  - crowdsecurity/appsec-default
+  - my/bitrix-appsec
+```
+
+```bash
+sudo systemctl reload crowdsec
+sudo cscli appsec-rules list | grep my/bitrix
+sudo cscli appsec-configs list | grep my/bitrix
+```
+
+`default_remediation: ban` блокирует этот запрос и ставит бан на IP. Адрес, с которого открывают страницу импорта Excel, тоже попадёт в бан. Офис и сервер 1С держите в allowlist.
+
 ## Пример
 
 На консоли CrowdSec решения этих сценариев видны по префиксу `my/`. Ниже живой бан по `my/bitrix-aspro-exploit` (три срабатывания, блок на месяц) и уже истёкший бан по `my/bitrix-cve-2022-50911`.
@@ -56,6 +89,7 @@ sudo cscli scenarios list | grep my/bitrix
 | `bitrix-kernel-scanner.yaml` | Серия 403/404 по `/bitrix/admin`, `tools`, `components`, `php_interface`, `modules` |
 | `bitrix-1c-exchange-bruteforce.yaml` | Серия 401/403 на `1c_exchange.php?mode=checkauth` |
 | `bitrix-webshell-probe.yaml` | Запрос `sale_print.php` или расширений `.phar`, `.pht`, `.phps` в `/upload/` |
+| `bitrix-esol-kda.yaml` | Запрос к `.php` модулей esol/kda в `/bitrix/admin` и `/bitrix/modules` |
 
 Пороги заданы в каждом файле: `capacity` — сколько событий помещается в бакет, `leakspeed` — как быстро бакет пустеет, `blackhole` — на сколько глушится источник после переполнения.
 

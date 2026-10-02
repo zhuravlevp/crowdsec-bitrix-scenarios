@@ -1,0 +1,19 @@
+name: my/bitrix-esol-kda
+description: "HTTP-запрос к cron-скриптам и профилям модулей esol/kda"
+rules:
+  - zones:
+      - URI
+    transform:
+      - urldecode
+      - lowercase
+      - normalize_path
+    match:
+      type: regex
+      value: '/bitrix/(admin|modules)/.*(esol|kda).*\.php'
+labels:
+  type: exploit
+  service: http
+  behavior: "http:exploit"
+  confidence: 3
+  spoofable: 0
+  label: "Bitrix esol/kda cron or profile script"

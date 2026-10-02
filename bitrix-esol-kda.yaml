@@ -1,0 +1,15 @@
+type: leaky
+name: my/bitrix-esol-kda
+description: "Разведка и атаки на cron-скрипты модулей esol/kda"
+filter: |
+  evt.Meta.service == 'http' &&
+  (evt.Parsed.program == 'nginx' || evt.Parsed.program == 'apache2') &&
+  evt.Parsed.request matches "(?i)/bitrix/(admin|modules)/.*(esol|kda).+\\.php"
+groupby: "evt.Meta.source_ip"
+capacity: 1
+leakspeed: "10s"
+blackhole: 30m
+labels:
+  remediation: true
+  type: "bitrix-esol-kda"
+  service: http

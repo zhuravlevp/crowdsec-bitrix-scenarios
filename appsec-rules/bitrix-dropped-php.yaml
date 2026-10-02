@@ -1,0 +1,19 @@
+name: my/bitrix-dropped-php
+description: "Запрос к php с шестнадцатеричным именем в корне сайта"
+rules:
+  - zones:
+      - URI
+    transform:
+      - urldecode
+      - lowercase
+      - normalize_path
+    match:
+      type: regex
+      value: '^/[a-f0-9]{8,32}\.php$'
+labels:
+  type: exploit
+  service: http
+  behavior: "http:exploit"
+  confidence: 2
+  spoofable: 0
+  label: "Hex-named PHP file in web root"
