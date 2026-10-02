@@ -29,6 +29,12 @@ sudo cscli scenarios list | grep my/bitrix
 
 В логе CrowdSec не должно быть ошибок разбора YAML. После срабатывания решение появляется в `sudo cscli decisions list`.
 
+## Пример
+
+На консоли CrowdSec решения этих сценариев видны по префиксу `my/`. Ниже живой бан по `my/bitrix-aspro-exploit` (три срабатывания, блок на месяц) и уже истёкший бан по `my/bitrix-cve-2022-50911`.
+
+![Решения CrowdSec по сценариям my/bitrix](docs/decisions-example.png)
+
 ## Сценарии
 
 | Файл | Что ловит |
