@@ -1,0 +1,5 @@
+name: my/bitrix-appsec
+default_remediation: ban
+inband_rules:
+  - my/bitrix-esol-kda
+  - my/bitrix-dropped-php
