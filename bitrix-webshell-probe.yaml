@@ -1,0 +1,21 @@
+type: leaky
+name: my/bitrix-webshell-probe
+description: "Запрос вебшелла или опасного расширения в upload"
+filter: |
+  evt.Meta.service == 'http' &&
+  (evt.Parsed.program == 'nginx' || evt.Parsed.program == 'apache2') &&
+  (
+    evt.Parsed.request matches "(?i)/sale_print\\.php" ||
+    (
+      evt.Parsed.request matches "(?i)/upload/" &&
+      evt.Parsed.request matches "(?i)\\.(phar|pht|phps)(\\?|$)"
+    )
+  )
+groupby: "evt.Meta.source_ip"
+capacity: 1
+leakspeed: "10s"
+blackhole: 30m
+labels:
+  remediation: true
+  type: "bitrix-webshell-probe"
+  service: http

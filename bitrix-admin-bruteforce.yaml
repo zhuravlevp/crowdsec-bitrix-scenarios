@@ -1,0 +1,16 @@
+type: leaky
+name: my/bitrix-admin-bruteforce
+description: "Брутфорс панели администратора Битрикс"
+filter: |
+  evt.Meta.service == 'http' &&
+  (evt.Parsed.program == 'nginx' || evt.Parsed.program == 'apache2') &&
+  evt.Parsed.request matches "(?i)/bitrix/admin/index\\.php" &&
+  evt.Parsed.status == "200"
+groupby: "evt.Meta.source_ip"
+capacity: 7
+leakspeed: "1m"
+blackhole: 20m
+labels:
+  remediation: true
+  type: "bitrix-admin-bf"
+  service: http

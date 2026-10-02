@@ -1,0 +1,16 @@
+type: leaky
+name: my/bitrix-html-editor-inject
+description: "Object injection через html_editor_action.php"
+filter: |
+  evt.Meta.service == 'http' &&
+  (evt.Parsed.program == 'nginx' || evt.Parsed.program == 'apache2') &&
+  evt.Parsed.request matches "(?i)/bitrix/tools/html_editor_action\\.php" &&
+  evt.Parsed.request matches "(?i)(%00|\\x00|\\.phar|\\.htaccess)"
+groupby: "evt.Meta.source_ip"
+capacity: 1
+leakspeed: "10s"
+blackhole: 30m
+labels:
+  remediation: true
+  type: "bitrix-html-editor-rce"
+  service: http

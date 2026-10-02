@@ -1,0 +1,15 @@
+type: leaky
+name: my/bitrix-recon-backup
+description: "Поиск забытых бэкапов и скриптов восстановления"
+filter: |
+  evt.Meta.service == 'http' &&
+  (evt.Parsed.program == 'nginx' || evt.Parsed.program == 'apache2') &&
+  evt.Parsed.request matches "(?i)/(restore\\.php|bitrixsetup\\.php|bitrix_setup\\.php|dump.*\\.sql|\\d{2}_\\d{2}_\\d{4}.*\\.(tar\\.gz|zip))"
+groupby: "evt.Meta.source_ip"
+capacity: 2
+leakspeed: "30s"
+blackhole: 30m
+labels:
+  remediation: true
+  type: "bitrix-backup-scan"
+  service: http

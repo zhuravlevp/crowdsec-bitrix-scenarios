@@ -1,0 +1,17 @@
+type: leaky
+name: my/bitrix-1c-exchange-bruteforce
+description: "Брутфорс 1C exchange checkauth"
+filter: |
+  evt.Meta.service == 'http' &&
+  (evt.Parsed.program == 'nginx' || evt.Parsed.program == 'apache2') &&
+  evt.Parsed.request matches "(?i)/bitrix/admin/1c_exchange\\.php" &&
+  evt.Parsed.request matches "(?i)mode=checkauth" &&
+  evt.Parsed.status in ["401", "403"]
+groupby: "evt.Meta.source_ip"
+capacity: 5
+leakspeed: "1m"
+blackhole: 20m
+labels:
+  remediation: true
+  type: "bitrix-1c-bf"
+  service: http

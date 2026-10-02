@@ -1,0 +1,16 @@
+type: leaky
+name: my/bitrix-kernel-scanner
+description: "Агрессивный скан структуры ядра (403/404 ошибки)"
+filter: |
+  evt.Meta.service == 'http' &&
+  (evt.Parsed.program == 'nginx' || evt.Parsed.program == 'apache2') &&
+  evt.Parsed.request matches "(?i)/bitrix/(admin|tools|components|php_interface|modules)/" &&
+  evt.Parsed.status in ["403", "404"]
+groupby: "evt.Meta.source_ip"
+capacity: 10
+leakspeed: "20s"
+blackhole: 15m
+labels:
+  remediation: true
+  type: "bitrix-kernel-scan"
+  service: http
